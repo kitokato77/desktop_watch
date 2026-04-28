@@ -20,9 +20,11 @@ namespace desktop_watch
         [DllImport("user32.dll")] private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
         [DllImport("user32.dll")] private static extern int GetWindowLong(IntPtr hwnd, int index);
         [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+        [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_TOOLWINDOW = 0x00000080;
         private const int WS_EX_APPWINDOW = 0x00040000;
+        private const int DWMWA_EXCLUDED_FROM_PEEK = 12;
         private static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
         private const uint SWP_NOSIZE = 0x0001;
         private const uint SWP_NOMOVE = 0x0002;
@@ -313,6 +315,10 @@ namespace desktop_watch
             int extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
             SetWindowLong(hwnd, GWL_EXSTYLE, (extendedStyle | WS_EX_TOOLWINDOW) & ~WS_EX_APPWINDOW);
             SetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+
+            // ID: cegah transparan saat Aero Peek | EN: prevent transparency during Aero Peek
+            int excludeFromPeek = 1;
+            DwmSetWindowAttribute(hwnd, DWMWA_EXCLUDED_FROM_PEEK, ref excludeFromPeek, sizeof(int));
         }
 
         // --- ID: autostart via Registry | EN: autostart via Registry ---
