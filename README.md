@@ -5,6 +5,8 @@ Desktop Watch is a lightweight WPF widget for Windows that shows time, date, wea
 ## Features
 - Live clock and Indonesian locale date
 - Weather via Open-Meteo (no API key required)
+- Auto-refresh weather every 30 minutes
+- Offline weather fallback (uses last saved fetch)
 - National holidays via libur.deno.dev
 - Quick position shortcuts (Shift + 1..6)
 - City change (Shift + L)
@@ -39,13 +41,19 @@ Use the shortcuts below to move the widget, change the city, or toggle autostart
 | Shift + L | Change city |
 | Shift + S | Toggle autostart |
 
+## Weather tooltip
+Hover the weather text to see whether the data is online or offline and the last update time.
+
 ## Data storage
 Settings are saved at:
 `%LOCALAPPDATA%\DesktopWatch\config.json`
+
+Weather cache is saved at:
+`%LOCALAPPDATA%\DesktopWatch\weather_cache.json`
 
 ## Autostart
 Autostart uses the Windows Registry:
 `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 
 ## Notes
-- Weather and holiday data require an internet connection. When offline, the app shows a fallback message.
+- Weather and holiday data require an internet connection. When offline, the app uses the last cached weather.

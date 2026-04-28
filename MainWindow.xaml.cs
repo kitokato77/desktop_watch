@@ -32,6 +32,9 @@ namespace desktop_watch
         private JsonArray? holidaysArray = null;
         private string lastCheckedDate = "";
         private string configPath = "";
+        private string weatherCachePath = "";
+        private string lastWeatherSource = "";
+        private DateTimeOffset? lastWeatherUpdatedUtc = null;
 
         private double lat = -7.98;
         private double lon = 112.63;
@@ -60,6 +63,7 @@ namespace desktop_watch
 
             // ID: set alamat config final | EN: set final config path
             configPath = Path.Combine(appFolder, "config.json");
+            weatherCachePath = Path.Combine(appFolder, "weather_cache.json");
             LoadConfig();
 
             _ = FetchHolidaysAsync();
@@ -114,8 +118,67 @@ namespace desktop_watch
                     string? temp = node["current"]?["temperature_2m"]?.ToString();
                     int code = (int)(node["current"]?["weather_code"]?.GetValue<int>() ?? 0);
                     CuacaText.Text = $"{GetWeatherIcon(code)} {cityName}, {temp}°C";
+
+                    lastWeatherSource = "online";
+                    lastWeatherUpdatedUtc = DateTimeOffset.UtcNow;
+                    UpdateWeatherTooltip();
+
+                    SaveWeatherCache(new WeatherCache {
+                        Temp = temp,
+                        Code = code,
+                        City = cityName,
+                        UpdatedAtUtc = lastWeatherUpdatedUtc.Value
+                    });
                 }
-            } catch { CuacaText.Text = "☁️ Cuaca Offline"; }
+            } catch {
+                if (TryLoadWeatherCache(out WeatherCache? cached) && cached != null) {
+                    CuacaText.Text = $"{GetWeatherIcon(cached.Code)} {cached.City}, {cached.Temp}°C (offline)";
+                    lastWeatherSource = "offline";
+                    lastWeatherUpdatedUtc = cached.UpdatedAtUtc;
+                    UpdateWeatherTooltip();
+                } else {
+                    CuacaText.Text = "☁️ Cuaca Offline";
+                    lastWeatherSource = "offline";
+                    lastWeatherUpdatedUtc = null;
+                    UpdateWeatherTooltip();
+                }
+            }
+        }
+
+        private void UpdateWeatherTooltip()
+        {
+            string timeText = lastWeatherUpdatedUtc.HasValue
+                ? lastWeatherUpdatedUtc.Value.ToLocalTime().ToString("HH:mm")
+                : "-";
+            string sourceText = string.IsNullOrEmpty(lastWeatherSource) ? "unknown" : lastWeatherSource;
+            CuacaText.ToolTip = $"Data: {sourceText} | Updated: {timeText}";
+        }
+
+        private sealed class WeatherCache
+        {
+            public string? Temp { get; set; }
+            public int Code { get; set; }
+            public string? City { get; set; }
+            public DateTimeOffset UpdatedAtUtc { get; set; }
+        }
+
+        private void SaveWeatherCache(WeatherCache cache)
+        {
+            try {
+                string json = JsonSerializer.Serialize(cache);
+                File.WriteAllText(weatherCachePath, json);
+            } catch { }
+        }
+
+        private bool TryLoadWeatherCache(out WeatherCache? cache)
+        {
+            cache = null;
+            try {
+                if (!File.Exists(weatherCachePath)) return false;
+                string json = File.ReadAllText(weatherCachePath);
+                cache = JsonSerializer.Deserialize<WeatherCache>(json);
+                return cache != null;
+            } catch { return false; }
         }
 
         private string GetWeatherIcon(int code) {
