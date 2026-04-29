@@ -55,5 +55,9 @@ Weather cache is saved at:
 Autostart uses the Windows Registry:
 `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 
+## Ram Consumption
+<img width="773" height="39" alt="image" src="https://github.com/user-attachments/assets/37613835-d987-47df-8498-92cbd9bfa470" />
+
+
 ## Notes
 - Weather and holiday data require an internet connection. When offline, the app uses the last cached weather.
