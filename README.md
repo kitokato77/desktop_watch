@@ -58,6 +58,8 @@ Autostart uses the Windows Registry:
 ## Ram Consumption
 <img width="773" height="39" alt="image" src="https://github.com/user-attachments/assets/37613835-d987-47df-8498-92cbd9bfa470" />
 
+## UI
+<img width="403" height="210" alt="image" src="https://github.com/user-attachments/assets/faef5df1-97b0-49fc-a435-1485b990c423" />
 
 ## Notes
 - Weather and holiday data require an internet connection. When offline, the app uses the last cached weather.
